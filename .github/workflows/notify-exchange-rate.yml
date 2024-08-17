@@ -17,4 +17,4 @@ jobs:
       - name: Install dependencies
         run: go get .
       - name: Run
-        run: go run . exchange-rate --discord-webhook-url ${{ secrets.DISCORD_WEBHOOK_URL }} --app-id ${{ secrets.EXCHANGE_RATE_APP_ID }}
+        run: go run . --discord-webhook-url ${{ secrets.DISCORD_WEBHOOK_URL }} exchange-rate --app-id ${{ secrets.EXCHANGE_RATE_APP_ID }}
