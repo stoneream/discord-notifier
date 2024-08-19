@@ -3,7 +3,7 @@ name: NotifyExchangeRate
 on:
   workflow_dispatch:
   schedule:
-    - cron: "00 1 * * *" # JST 16:00
+    - cron: "00 7 * * *" # JST 16:00
 
 jobs:
   run:
