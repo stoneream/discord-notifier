@@ -19,10 +19,11 @@ class ExchangeRateMode:
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         message = """
-USD/JPY: %f
-(%s)
+USD/JPY: {usd_jpy}
+({now})
 """.format(
-            usd_jpy, now
+            usd_jpy=usd_jpy,
+            now=now,
         )
 
         discrod_webhook_client.send_message(content=message, username="為替レート")
