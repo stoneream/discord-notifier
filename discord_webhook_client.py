@@ -8,11 +8,8 @@ class DiscordWebHookClient:
 
     def send_message(self, username, content, image_filepath=None):
         url = self.webhook_url
-        payload = {
-            "content": content,
-            "username": username,
-        }
 
+        payload = None
         files = None
         if image_filepath is not None:
             files = {
@@ -21,14 +18,24 @@ class DiscordWebHookClient:
                     open(image_filepath, "rb"),
                 )
             }
+            payload = {
+                "content": content,
+                "username": username,
+                "embeds": []
+            }
+        else:
+            payload = {
+                "content": content,
+                "username": username,
+            }
 
         response = requests.post(
             url,
-            json=payload,
+            data=payload,
             files=files
         )
 
-        if response.status_code != 204:
+        if response.status_code != 204 and response.status_code != 200:
             raise Exception(
                 f"Failed to send message: {response.status_code}, {response.text}"
             )

@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from PIL import Image
 from discord_webhook_client import DiscordWebHookClient
-
+from selenium.webdriver.support import expected_conditions as EC
 
 class TenkiJpMode:
     def __init__(
@@ -58,6 +58,10 @@ class TenkiJpMode:
         print("Start capturing screenshot:", url)
 
         self.driver.get(url)
+
+        # すべての要素が読み込まれるまで待機
+        WebDriverWait(self.driver, 15).until(EC.presence_of_all_elements_located)
+
         # 始点のエレメント (市区町村名)
         start_element = WebDriverWait(self.driver, 10).until(
             lambda driver: driver.find_element(
@@ -85,7 +89,8 @@ class TenkiJpMode:
         print("Finish capturing screenshot, url:", url)
 
     def send_discord(self, url: str):
-        content = "from {url}".format(url=url)
+        # content = "from {url}".format(url=url)
+        content = ""
         self.discrod_webhook_client.send_message(
             content=content,
             username="お天気情報",
