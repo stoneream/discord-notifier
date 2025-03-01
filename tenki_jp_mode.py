@@ -85,7 +85,7 @@ class TenkiJpMode:
         print("Finish capturing screenshot, url:", url)
 
     def send_discord(self, url: str):
-        content = "{url}".format(url=url)
+        content = "from {url}".format(url=url)
         self.discrod_webhook_client.send_message(
             content=content,
             username="お天気情報",
