@@ -1,43 +1,93 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-import logging
 from selenium.webdriver.support.ui import WebDriverWait
+from PIL import Image
+from discord_webhook_client import DiscordWebHookClient
 
 
 class TenkiJpMode:
-    def __init__(self):
-        pass
+    def __init__(
+        self,
+        chromedriver_path: str,
+        dry_run: bool,
+        discord_webhook_url: str,
+    ):
+        self.chromedriver_path = chromedriver_path
+        self.dry_run = dry_run
 
-    def execute(self):
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.INFO)
-
-        CHROMEDRIVER_PATH = "/opt/homebrew/bin/chromedriver"
-        USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100"
-
+        CHROMEDRIVER_PATH = self.chromedriver_path
         options = webdriver.ChromeOptions()
-        options.add_argument("--user-agent={user_agent}".format(user_agent=USER_AGENT))
         options.add_argument("--incognito")
         options.add_argument("--hide-scrollbars")
         options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--headless")
+        options.add_argument("--window-size=2560,1440")
 
-        # options.add_argument("--headless")
-        # options.add_argument("--no-sandbox")
         service = Service(CHROMEDRIVER_PATH)
-        driver = webdriver.Chrome(service=service, options=options)
-        URL = "https://tenki.jp/forecast/3/16/4410/13112/"
+        self.driver = webdriver.Chrome(service=service, options=options)
+
+        self.discrod_webhook_client = DiscordWebHookClient(
+            webhook_url=discord_webhook_url
+        )
+
+        self.screenshot_path = "screenshot.png"
+
+        pass
+
+    def execute(self):
+        urls = []
+
+        with open("tenki-jp-urls.txt", "r") as f:
+            for line in f:
+                if line.strip() != "":
+                    urls.append(line)
 
         try:
-            driver.get(URL)
-            element = driver.find_element(
-                By.XPATH,
-                '//*[@id="main-column"]/section/div[3]',
-            )
-            png_bytes = element.screenshot_as_png
+            for url in urls:
+                self.screenshot(url)
 
-            with open("screenshot.png", "wb") as f:
-                f.write(png_bytes)
-
+                if self.dry_run:
+                    print("Dry run mode, skip sending discord")
+                else:
+                    self.send_discord(url)
         finally:
-            driver.quit()
+            self.driver.quit()
+
+    def screenshot(self, url: str):
+        print("Start capturing screenshot:", url)
+
+        self.driver.get(url)
+        # 始点のエレメント (市区町村名)
+        start_element = WebDriverWait(self.driver, 10).until(
+            lambda driver: driver.find_element(
+                By.XPATH, '//*[@id="main-column"]/section/h2'
+            )
+        )
+        # 終点のエレメント
+        end_element = WebDriverWait(self.driver, 10).until(
+            lambda driver: driver.find_element(By.XPATH, '//*[@id="start-stop-box"]')
+        )
+        # それぞれの要素が対角になるように領域を指定
+        start_xy = start_element.location
+        end_xy = end_element.location
+        left = start_xy["x"]
+        top = start_xy["y"]
+        right = end_xy["x"] + end_element.size["width"]
+        bottom = end_xy["y"] + end_element.size["height"]
+
+        # スクリーンショットを撮影し、切り取り処理
+        self.driver.save_screenshot(self.screenshot_path)
+        image = Image.open(self.screenshot_path)
+        cropped_image = image.crop((left, top, right, bottom))
+        cropped_image.save(self.screenshot_path)
+
+        print("Finish capturing screenshot, url:", url)
+
+    def send_discord(self, url: str):
+        content = "{url}".format(url=url)
+        self.discrod_webhook_client.send_message(
+            content=content,
+            username="お天気情報",
+            image_filepath=self.screenshot_path,
+        )

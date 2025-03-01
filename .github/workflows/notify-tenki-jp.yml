@@ -1,0 +1,27 @@
+name: NotifyExchangeRate
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "00 22 * * *" # JST 07:00
+    - cron: "00 6 * * *" # JST 15:00
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.13"
+      - name: Install pipenv
+        run: pip install pipenv
+      - name: Install dependencies
+        run: pipenv install
+      - name: Run
+        run: |
+          pipenv run python main.py \
+            --mode tenki-jp \
+            --discord-webhook-url ${{ secrets.DISCORD_WEBHOOK_URL }}
+            --dry-run false
