@@ -1,4 +1,4 @@
-name: NotifyExchangeRate
+name: TenkiJP
 
 on:
   workflow_dispatch:
