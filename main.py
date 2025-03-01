@@ -28,5 +28,9 @@ if __name__ == "__main__":
             app_id=app_id,
             discord_webhook_url=discord_webhook_url,
         ).execute()
+    elif mode == "tenki-jp":
+        from tenki_jp_mode import TenkiJpMode
+
+        TenkiJpMode().execute()
     else:
         raise Exception(f"Unknown mode: {mode}")
