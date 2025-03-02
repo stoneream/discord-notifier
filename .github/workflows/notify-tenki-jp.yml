@@ -48,6 +48,7 @@ jobs:
       - name: Install dependencies
         run: pipenv install
   run:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Run
