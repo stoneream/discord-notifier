@@ -7,7 +7,7 @@ on:
     - cron: "00 6 * * *" # JST 15:00
 
 jobs:
-  setup:
+  run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -47,10 +47,6 @@ jobs:
         run: pip install pipenv
       - name: Install dependencies
         run: pipenv install
-  run:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
       - name: Run
         run: |
           pipenv run python main.py \
