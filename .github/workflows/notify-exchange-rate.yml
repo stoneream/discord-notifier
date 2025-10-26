@@ -18,7 +18,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ".python-version"
+          python-version-file: ".python-version"
       - name: uv Sync
         run: uv sync --locked --all-extras --dev
       - name: Run
