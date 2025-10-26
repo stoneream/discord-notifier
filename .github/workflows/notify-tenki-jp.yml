@@ -10,25 +10,21 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.13"
-      - name: Set up ChromeDriver
-        uses: nanasess/setup-chromedriver@v2
+          version: "0.9.5"
+          enable-cache: true
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          chromedriver-version: '88.0.4324.96'
-          chromeapp: chrome
-      - name: Install Japanese Font
-        run: sudo apt-get install -y fonts-noto
-      - name: Install pipenv
-        run: pip install pipenv
-      - name: Install dependencies
-        run: pipenv install
+          python-version: ".python-version"
+      - name: uv Sync
+        run: uv sync --locked --all-extras --dev
       - name: Run
         run: |
-          pipenv run python main.py \
+          uv run python main.py \
             --mode tenki-jp \
             --discord-webhook-url ${{ secrets.DISCORD_WEBHOOK_URL }} \
             --dry-run false
