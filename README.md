@@ -5,6 +5,7 @@ Discordにいろいろ通知くん
 ## installation
 
 ```bash
-uv sync
+uv venv
 
+uv sync
 ```
